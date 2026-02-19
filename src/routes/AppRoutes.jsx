@@ -9,7 +9,7 @@ import EventDetails from "../pages/EventDetails";
 import BrowseEvents from "../pages/BrowseEvents";
 import Signup from "../pages/Signup";
 import Login from "../pages/Login";
-import Onboarding from "../pages/Onboarding.jsx";
+import Onboarding from "../pages/Onboarding";
 import ParticipantDashboard from "../pages/ParticipantDashboard";
 import OrganizerDashboard from "../pages/OrganizerDashboard";
 import AdminDashboard from "../pages/AdminDashboard";
