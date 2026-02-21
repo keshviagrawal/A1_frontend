@@ -16,6 +16,9 @@ export default function Profile() {
   const [allOrganizers, setAllOrganizers] = useState([]);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [saveMsg, setSaveMsg] = useState(null);
+  const [pwMsg, setPwMsg] = useState(null);
+  const [contactError, setContactError] = useState("");
 
   // Form Fields
   const [firstName, setFirstName] = useState("");
@@ -49,6 +52,15 @@ export default function Profile() {
   };
 
   const handleSave = async () => {
+    setSaveMsg(null);
+    setContactError("");
+
+    // Validate contact number
+    if (contactNumber && !/^\d{10}$/.test(contactNumber)) {
+      setContactError("Contact number must be exactly 10 digits");
+      return;
+    }
+
     try {
       await updateProfile({
         firstName,
@@ -57,9 +69,9 @@ export default function Profile() {
         interests,
         followedOrganizers
       });
-      alert("Profile updated successfully!");
+      setSaveMsg({ type: "success", text: "Profile updated successfully!" });
     } catch (err) {
-      alert("Failed to update profile");
+      setSaveMsg({ type: "error", text: "Failed to update profile" });
     }
   };
 
@@ -76,20 +88,29 @@ export default function Profile() {
   };
 
   const handleChangePassword = async () => {
+    setPwMsg(null);
+
+    if (!currentPassword || !newPassword) {
+      setPwMsg({ type: "error", text: "Both fields are required" });
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPwMsg({ type: "error", text: "New password must be at least 6 characters" });
+      return;
+    }
+
     try {
       await api.put("/participants/change-password", {
         currentPassword,
         newPassword,
       });
 
-      alert("Password updated successfully");
+      setPwMsg({ type: "success", text: "Password updated successfully!" });
       setCurrentPassword("");
       setNewPassword("");
     } catch (error) {
-      console.error(error);
-      const status = error.response?.status;
-      const msg = error.response?.data?.message || "Unknown error";
-      alert(`Failed to update password. Status: ${status}. Message: ${msg}`);
+      const msg = error.response?.data?.message || "Failed to update password";
+      setPwMsg({ type: "error", text: msg });
     }
   };
 
@@ -111,7 +132,13 @@ export default function Profile() {
 
       <div style={{ marginBottom: 20 }}>
         <label>Contact: </label>
-        <input value={contactNumber} onChange={e => setContactNumber(e.target.value)} />
+        <input
+          value={contactNumber}
+          onChange={e => { setContactNumber(e.target.value); setContactError(""); }}
+          placeholder="10-digit phone number"
+          maxLength={10}
+        />
+        {contactError && <p style={{ color: "red", fontSize: "0.85rem", margin: "4px 0 0" }}>{contactError}</p>}
       </div>
 
       <hr />
@@ -158,6 +185,9 @@ export default function Profile() {
       }}>
         Save Changes
       </button>
+      {saveMsg && (
+        <p style={{ color: saveMsg.type === "success" ? "green" : "red", marginTop: 8 }}>{saveMsg.text}</p>
+      )}
 
       <h3>Change Password</h3>
 
@@ -175,9 +205,14 @@ export default function Profile() {
         onChange={(e) => setNewPassword(e.target.value)}
       />
 
-      <button onClick={handleChangePassword}>
+      <button onClick={handleChangePassword} style={{
+        padding: '8px 16px', background: '#007bff', color: 'white', border: 'none', borderRadius: 5, cursor: 'pointer', marginTop: 10
+      }}>
         Update Password
       </button>
+      {pwMsg && (
+        <p style={{ color: pwMsg.type === "success" ? "green" : "red", marginTop: 8 }}>{pwMsg.text}</p>
+      )}
     </Layout>
 
 

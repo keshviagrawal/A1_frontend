@@ -51,3 +51,33 @@ export const updateOrganizerProfile = async (data) => {
   const response = await api.put("/organizer/profile", data);
   return response.data;
 };
+
+// Merchandise Payment Approval
+export const getMerchOrders = async (eventId, status) => {
+  const params = status ? `?status=${status}` : "";
+  const response = await api.get(`/events/${eventId}/orders${params}`);
+  return response.data;
+};
+
+export const approveMerchOrder = async (eventId, orderId) => {
+  const response = await api.patch(`/events/${eventId}/orders/${orderId}/approve`);
+  return response.data;
+};
+
+export const rejectMerchOrder = async (eventId, orderId) => {
+  const response = await api.patch(`/events/${eventId}/orders/${orderId}/reject`);
+  return response.data;
+};
+
+// QR Scanner & Attendance
+export const scanQRAttendance = async (eventId, qrData) => {
+  const response = await api.post(`/events/${eventId}/attendance/scan`, { qrData });
+  return response.data;
+};
+
+export const manualOverrideAttendance = async (eventId, registrationId, action, reason) => {
+  const response = await api.post(`/events/${eventId}/attendance/manual`, {
+    registrationId, action, reason,
+  });
+  return response.data;
+};

@@ -21,6 +21,7 @@ import OrganizerEventDetails from "../pages/OrganizerEventDetails"; // Secure ma
 import OrganizerProfile from "../pages/OrganizerProfile"; // Secure profile page
 import CreateEvent from "../pages/CreateEvent";
 import ManageOrganizers from "../pages/ManageOrganizers";
+import QRScanner from "../pages/QRScanner";
 
 import { getToken, getRole } from "../utils/auth";
 
@@ -109,6 +110,15 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["organizer"]}>
               <OrganizerEventDetails />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/organizer/event/:eventId/scanner"
+          element={
+            <ProtectedRoute allowedRoles={["organizer"]}>
+              <QRScanner />
             </ProtectedRoute>
           }
         />

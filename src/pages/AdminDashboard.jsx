@@ -10,6 +10,10 @@ export default function AdminDashboard() {
           <h3>Manage Organizers</h3>
           <p>View, Add, Disable Organizers</p>
         </div>
+        <div style={cardStyle} onClick={() => window.location.href = '/admin/organizers'}>
+          <h3>🔑 Password Reset Requests</h3>
+          <p>View & process organizer password reset requests</p>
+        </div>
         {/* Future: Manage Events, View Reports */}
       </div>
     </Layout>

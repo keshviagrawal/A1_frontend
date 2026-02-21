@@ -73,7 +73,7 @@ export default function CreateEvent() {
 
             await createEvent(eventData);
             alert("Event created successfully!");
-            navigate("/organizer/dashboard");
+            navigate("/organizer");
         } catch (err) {
             alert("Failed to create event: " + (err.response?.data?.message || err.message));
         }
@@ -246,7 +246,7 @@ export default function CreateEvent() {
                     <button onClick={handleCreate} style={btnStyle}>
                         Create Event
                     </button>
-                    <button onClick={() => navigate("/organizer/dashboard")} style={{ ...btnStyle, background: "#6c757d", marginLeft: "10px" }}>
+                    <button onClick={() => navigate("/organizer")} style={{ ...btnStyle, background: "#6c757d", marginLeft: "10px" }}>
                         Cancel
                     </button>
                 </div>
