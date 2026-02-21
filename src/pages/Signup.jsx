@@ -19,17 +19,13 @@ export default function Signup() {
     e.preventDefault();
     setError("");
 
-    // Validate required fields
     if (!email || !firstName || !lastName || !collegeOrOrgName || !contactNumber) {
       return setError("All fields are required");
     }
-
-    // Validate contact number (10 digits)
     if (!/^\d{10}$/.test(contactNumber)) {
       return setError("Contact number must be 10 digits");
     }
 
-    // IIIT email validation
     const iiitDomains = ["@iiit.ac.in", "@students.iiit.ac.in", "@research.iiit.ac.in"];
     if (participantType === "IIIT") {
       const isValidIIIT = iiitDomains.some(domain => email.endsWith(domain));
@@ -38,28 +34,16 @@ export default function Signup() {
       }
     }
 
-    // Password validation for all users
-    if (!password || !confirmPassword) {
-      return setError("Password is required");
+    if (participantType === "NON-IIIT" && collegeOrOrgName.trim().toLowerCase() === "iiit hyderabad") {
+      return setError("You have selected Non-IIIT but entered IIIT Hyderabad as your college. Please select IIIT Student if you are an IIIT student.");
     }
-    if (password.length < 6) {
-      return setError("Password must be at least 6 characters");
-    }
-    if (password !== confirmPassword) {
-      return setError("Passwords do not match");
-    }
+
+    if (!password || !confirmPassword) return setError("Password is required");
+    if (password.length < 6) return setError("Password must be at least 6 characters");
+    if (password !== confirmPassword) return setError("Passwords do not match");
 
     try {
-      await registerUser({
-        email,
-        password,
-        firstName,
-        lastName,
-        participantType,
-        collegeOrOrgName,
-        contactNumber,
-      });
-
+      await registerUser({ email, password, firstName, lastName, participantType, collegeOrOrgName, contactNumber });
       alert("Registration successful. Please login.");
       navigate("/login");
     } catch (err) {
@@ -68,84 +52,77 @@ export default function Signup() {
   };
 
   return (
-    <div style={{ padding: 40 }}>
-      <h2>Participant Signup</h2>
+    <div className="auth-page">
+      <div className="auth-card" style={{ maxWidth: 520 }}>
+        <h2>Create Account</h2>
+        <p className="auth-subtitle">Join Felicity and explore events</p>
 
-      <form onSubmit={handleSignup}>
-        <input
-          placeholder="First Name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-        />
-        <br /><br />
+        <form onSubmit={handleSignup}>
+          <div className="form-row">
+            <div className="form-group">
+              <label>First Name</label>
+              <input placeholder="John" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label>Last Name</label>
+              <input placeholder="Doe" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+            </div>
+          </div>
 
-        <input
-          placeholder="Last Name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-        />
-        <br /><br />
+          <div className="form-group">
+            <label>Email</label>
+            <input type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
 
-        <input
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <br /><br />
+          <div className="form-group">
+            <label>Contact Number</label>
+            <input placeholder="10 digit number" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} maxLength={10} />
+          </div>
 
-        <input
-          placeholder="Contact Number (10 digits)"
-          value={contactNumber}
-          onChange={(e) => setContactNumber(e.target.value)}
-          maxLength={10}
-        />
-        <br /><br />
+          <div className="form-group">
+            <label>Participant Type</label>
+            <select
+              value={participantType}
+              onChange={(e) => {
+                setParticipantType(e.target.value);
+                if (e.target.value === "IIIT") setCollegeOrOrgName("IIIT Hyderabad");
+                else setCollegeOrOrgName("");
+              }}
+            >
+              <option value="NON-IIIT">Non-IIIT</option>
+              <option value="IIIT">IIIT Student</option>
+            </select>
+          </div>
 
-        <select
-          value={participantType}
-          onChange={(e) => {
-            setParticipantType(e.target.value);
-            if (e.target.value === "IIIT") setCollegeOrOrgName("IIIT Hyderabad");
-            else setCollegeOrOrgName("");
-          }}
-          style={{ padding: "8px", width: "200px" }}
-        >
-          <option value="NON-IIIT">Non-IIIT</option>
-          <option value="IIIT">IIIT Student</option>
-        </select>
-        <br /><br />
+          <div className="form-group">
+            <label>College / Organization</label>
+            <input
+              placeholder="Your college or organization"
+              value={collegeOrOrgName}
+              onChange={(e) => setCollegeOrOrgName(e.target.value)}
+            />
+          </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <br /><br />
+          <div className="form-row">
+            <div className="form-group">
+              <label>Password</label>
+              <input type="password" placeholder="Min 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label>Confirm Password</label>
+              <input type="password" placeholder="Re-enter password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            </div>
+          </div>
 
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-        />
-        <br /><br />
+          <button type="submit" className="btn-primary w-full">Create Account</button>
+        </form>
 
-        <input
-          placeholder="College / Organization Name"
-          value={collegeOrOrgName}
-          onChange={(e) => setCollegeOrOrgName(e.target.value)}
-        />
-        <br /><br />
+        {error && <p className="error-text mt-sm">{error}</p>}
 
-        <button type="submit">Register</button>
-      </form>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      <p>
-        Already have an account? <Link to="/login">Login</Link>
-      </p>
+        <p className="auth-footer">
+          Already have an account? <Link to="/login">Login</Link>
+        </p>
+      </div>
     </div>
   );
 }

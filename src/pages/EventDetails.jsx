@@ -12,7 +12,6 @@ export default function EventDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Merchandise purchase state
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -20,9 +19,7 @@ export default function EventDetails() {
   const [purchaseMsg, setPurchaseMsg] = useState(null);
   const [purchasing, setPurchasing] = useState(false);
 
-  useEffect(() => {
-    fetchEvent();
-  }, [id]);
+  useEffect(() => { fetchEvent(); }, [id]);
 
   const fetchEvent = async () => {
     try {
@@ -39,12 +36,9 @@ export default function EventDetails() {
   const handleRegister = async () => {
     try {
       if (event.registrationFee && event.registrationFee > 0) {
-        const confirmPayment = window.confirm(
-          `Confirm Payment of ₹${event.registrationFee}?`
-        );
+        const confirmPayment = window.confirm(`Confirm Payment of ₹${event.registrationFee}?`);
         if (!confirmPayment) return;
       }
-
       await api.post(`/events/${event._id}/register`);
       alert("Registration successful! Ticket sent to your email.");
     } catch (err) {
@@ -54,7 +48,6 @@ export default function EventDetails() {
 
   const handlePurchase = async () => {
     setPurchaseMsg(null);
-
     if (!selectedSize || !selectedColor) {
       setPurchaseMsg({ type: "error", text: "Please select size and color" });
       return;
@@ -71,15 +64,10 @@ export default function EventDetails() {
       formData.append("color", selectedColor);
       formData.append("quantity", quantity);
       formData.append("paymentProof", paymentProof);
-
       await api.post(`/events/${event._id}/purchase`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
-      setPurchaseMsg({
-        type: "success",
-        text: "Order placed! Your payment is pending organizer approval. You'll receive an email once approved.",
-      });
+      setPurchaseMsg({ type: "success", text: "Order placed! Payment pending organizer approval." });
       setPaymentProof(null);
     } catch (err) {
       setPurchaseMsg({ type: "error", text: err.response?.data?.message || "Purchase failed" });
@@ -91,180 +79,122 @@ export default function EventDetails() {
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
     return new Date(dateStr).toLocaleDateString("en-IN", {
-      day: "numeric", month: "short", year: "numeric",
-      hour: "2-digit", minute: "2-digit"
+      day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
     });
   };
 
-  if (loading) return <Layout><p style={{ padding: 20 }}>Loading...</p></Layout>;
-  if (error) return <Layout><p style={{ padding: 20, color: "red" }}>Error: {error}</p></Layout>;
-  if (!event) return <Layout><p style={{ padding: 20 }}>Event not found</p></Layout>;
+  if (loading) return <Layout><p>Loading...</p></Layout>;
+  if (error) return <Layout><p className="error-text">{error}</p></Layout>;
+  if (!event) return <Layout><p>Event not found</p></Layout>;
 
-  /* ---------------- Blocking Logic ---------------- */
-
-  const isDeadlinePassed =
-    event.registrationDeadline &&
-    new Date(event.registrationDeadline) < new Date();
-
-  const isFull =
-    event.eventType === "NORMAL" &&
-    event.registrationLimit > 0 &&
-    event.currentRegistrations >= event.registrationLimit;
-
-  const isStockOver =
-    event.eventType === "MERCHANDISE" &&
-    event.merchandiseDetails?.totalStock <= 0;
-
+  const isDeadlinePassed = event.registrationDeadline && new Date(event.registrationDeadline) < new Date();
+  const isFull = event.eventType === "NORMAL" && event.registrationLimit > 0 && event.currentRegistrations >= event.registrationLimit;
+  const isStockOver = event.eventType === "MERCHANDISE" && event.merchandiseDetails?.totalStock <= 0;
   const isDisabled = isDeadlinePassed || isFull || isStockOver;
 
-  // Get unique sizes and colors from variants
   const availableSizes = [...new Set(event.merchandiseDetails?.variants?.map(v => v.size) || [])];
   const availableColors = [...new Set(event.merchandiseDetails?.variants?.map(v => v.color) || [])];
-  const selectedVariant = event.merchandiseDetails?.variants?.find(
-    v => v.size === selectedSize && v.color === selectedColor
-  );
+  const selectedVariant = event.merchandiseDetails?.variants?.find(v => v.size === selectedSize && v.color === selectedColor);
 
   return (
     <Layout>
-      <div style={{ maxWidth: 700, margin: "0 auto" }}>
-        <h2>{event.eventName}</h2>
-
-        {/* Badges */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-          <span style={badgeStyle(event.eventType === "MERCHANDISE" ? "#e67e22" : "#3498db")}>
-            {event.eventType}
-          </span>
-          <span style={badgeStyle("#27ae60")}>{event.eligibility}</span>
-          {event.eventType === "NORMAL" && event.registrationFee > 0 && (
-            <span style={badgeStyle("#8e44ad")}>₹{event.registrationFee}</span>
-          )}
-          {event.eventType === "NORMAL" && event.registrationFee === 0 && (
-            <span style={badgeStyle("#2ecc71")}>FREE</span>
-          )}
+      <div style={{ maxWidth: 740, margin: "0 auto" }}>
+        {/* Header */}
+        <h2 className="page-title">{event.eventName}</h2>
+        <div className="flex gap-sm flex-wrap mb">
+          <span className={event.eventType === "MERCHANDISE" ? "badge badge-warning" : "badge badge-info"}>{event.eventType}</span>
+          <span className="badge badge-success">{event.eligibility}</span>
+          {event.eventType === "NORMAL" && event.registrationFee > 0 && <span className="badge badge-purple">₹{event.registrationFee}</span>}
+          {event.eventType === "NORMAL" && event.registrationFee === 0 && <span className="badge badge-success">FREE</span>}
         </div>
 
-        <p style={{ lineHeight: 1.6, color: "#444" }}>{event.description}</p>
+        <p style={{ lineHeight: 1.7, color: "var(--text-secondary)", marginBottom: 20 }}>{event.description}</p>
 
-        {/* Event Details Table */}
-        <table style={tableStyle}>
-          <tbody>
-            <tr>
-              <td style={labelStyle}>Organizer</td>
-              <td>{event.organizerId?.organizerName || "N/A"}</td>
-            </tr>
-            <tr>
-              <td style={labelStyle}>Start Date</td>
-              <td>{formatDate(event.eventStartDate)}</td>
-            </tr>
-            <tr>
-              <td style={labelStyle}>End Date</td>
-              <td>{formatDate(event.eventEndDate)}</td>
-            </tr>
-            <tr>
-              <td style={labelStyle}>Registration Deadline</td>
-              <td style={{ color: isDeadlinePassed ? "red" : "inherit" }}>
-                {formatDate(event.registrationDeadline)}
-                {isDeadlinePassed && " (Passed)"}
-              </td>
-            </tr>
-            <tr>
-              <td style={labelStyle}>Eligibility</td>
-              <td>{event.eligibility}</td>
-            </tr>
-            {event.eventType === "NORMAL" && (
-              <>
-                <tr>
-                  <td style={labelStyle}>Registration Fee</td>
-                  <td>{event.registrationFee > 0 ? `₹${event.registrationFee}` : "Free"}</td>
+        {/* Details */}
+        <div className="card mb">
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <tbody>
+              {[
+                ["Organizer", event.organizerId?.organizerName || "N/A"],
+                ["Start Date", formatDate(event.eventStartDate)],
+                ["End Date", formatDate(event.eventEndDate)],
+                [
+                  "Registration Deadline",
+                  <span style={{ color: isDeadlinePassed ? "var(--danger)" : "inherit" }}>
+                    {formatDate(event.registrationDeadline)}{isDeadlinePassed && " (Passed)"}
+                  </span>
+                ],
+                ["Eligibility", event.eligibility],
+                ...(event.eventType === "NORMAL" ? [
+                  ["Registration Fee", event.registrationFee > 0 ? `₹${event.registrationFee}` : "Free"],
+                  ["Registration Limit", event.registrationLimit],
+                ] : []),
+              ].map(([label, value], i) => (
+                <tr key={i}>
+                  <td style={{ fontWeight: 600, padding: "10px 14px 10px 0", borderBottom: "1px solid var(--gray-100)", color: "var(--gray-600)", width: 180 }}>{label}</td>
+                  <td style={{ padding: "10px 0", borderBottom: "1px solid var(--gray-100)", color: "var(--text)" }}>{value}</td>
                 </tr>
-                <tr>
-                  <td style={labelStyle}>Registration Limit</td>
-                  <td>{event.registrationLimit}</td>
-                </tr>
-              </>
-            )}
-          </tbody>
-        </table>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-        {/* -------- Add to Calendar -------- */}
         <AddToCalendar event={event} />
 
-        {/* -------- Merchandise Purchase Form -------- */}
+        {/* Merchandise Purchase */}
         {event.eventType === "MERCHANDISE" && (
-          <div style={{ background: "#f8f9fa", padding: 16, borderRadius: 8, margin: "16px 0" }}>
-            <h4 style={{ margin: "0 0 10px 0" }}>Merchandise Details</h4>
-            <p><strong>Item:</strong> {event.merchandiseDetails?.itemName}</p>
-            <p><strong>Price:</strong> ₹{event.merchandiseDetails?.price}</p>
-            <p><strong>Stock Left:</strong> {event.merchandiseDetails?.totalStock}</p>
+          <div className="card mt">
+            <h4 style={{ margin: "0 0 12px" }}>🛍️ Merchandise Details</h4>
+            <p style={{ margin: "4px 0", color: "var(--text)" }}><strong>Item:</strong> {event.merchandiseDetails?.itemName}</p>
+            <p style={{ margin: "4px 0", color: "var(--text)" }}><strong>Price:</strong> ₹{event.merchandiseDetails?.price}</p>
+            <p style={{ margin: "4px 0", color: "var(--text)" }}><strong>Stock Left:</strong> {event.merchandiseDetails?.totalStock}</p>
 
             {!isDisabled && (
-              <div style={{ marginTop: 16, borderTop: "1px solid #ddd", paddingTop: 16 }}>
-                <h4 style={{ margin: "0 0 12px 0" }}>Place Order</h4>
-
-                <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
-                  <div>
-                    <label style={{ fontWeight: "bold", display: "block", marginBottom: 4 }}>Size</label>
-                    <select value={selectedSize} onChange={e => setSelectedSize(e.target.value)} style={inputStyle}>
+              <div style={{ marginTop: 16, borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+                <h4 style={{ margin: "0 0 14px" }}>Place Order</h4>
+                <div className="form-row" style={{ gridTemplateColumns: "1fr 1fr auto", marginBottom: 14 }}>
+                  <div className="form-group">
+                    <label>Size</label>
+                    <select value={selectedSize} onChange={e => setSelectedSize(e.target.value)}>
                       <option value="">Select Size</option>
                       {availableSizes.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
-                  <div>
-                    <label style={{ fontWeight: "bold", display: "block", marginBottom: 4 }}>Color</label>
-                    <select value={selectedColor} onChange={e => setSelectedColor(e.target.value)} style={inputStyle}>
+                  <div className="form-group">
+                    <label>Color</label>
+                    <select value={selectedColor} onChange={e => setSelectedColor(e.target.value)}>
                       <option value="">Select Color</option>
                       {availableColors.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
-                  <div>
-                    <label style={{ fontWeight: "bold", display: "block", marginBottom: 4 }}>Qty</label>
-                    <input
-                      type="number" min={1} max={event.merchandiseDetails?.purchaseLimitPerParticipant || 5}
-                      value={quantity} onChange={e => setQuantity(parseInt(e.target.value) || 1)}
-                      style={{ ...inputStyle, width: 60 }}
+                  <div className="form-group">
+                    <label>Qty</label>
+                    <input type="number" min={1} max={event.merchandiseDetails?.purchaseLimitPerParticipant || 5}
+                      value={quantity} onChange={e => setQuantity(parseInt(e.target.value) || 1)} style={{ width: 70 }}
                     />
                   </div>
                 </div>
 
                 {selectedVariant && (
-                  <p style={{ fontSize: "0.9rem", color: "#555" }}>
-                    Stock for {selectedSize}/{selectedColor}: <strong>{selectedVariant.stock}</strong> •
-                    Total: <strong>₹{event.merchandiseDetails.price * quantity}</strong>
+                  <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: 10 }}>
+                    Stock: <strong>{selectedVariant.stock}</strong> • Total: <strong>₹{event.merchandiseDetails.price * quantity}</strong>
                   </p>
                 )}
 
-                <div style={{ marginBottom: 12 }}>
-                  <label style={{ fontWeight: "bold", display: "block", marginBottom: 4 }}>
-                    Payment Proof (screenshot/photo) *
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg"
-                    onChange={e => setPaymentProof(e.target.files[0])}
-                  />
+                <div className="form-group">
+                  <label>Payment Proof (screenshot/photo) *</label>
+                  <input type="file" accept="image/png,image/jpeg" onChange={e => setPaymentProof(e.target.files[0])} />
                 </div>
 
-                <button
-                  onClick={handlePurchase}
-                  disabled={purchasing}
-                  style={{
-                    padding: "10px 20px",
-                    background: purchasing ? "#ccc" : "#e67e22",
-                    color: "#fff", border: "none", borderRadius: 6,
-                    cursor: purchasing ? "not-allowed" : "pointer",
-                    fontWeight: "bold",
-                  }}
+                <button onClick={handlePurchase} disabled={purchasing}
+                  className={purchasing ? "btn-secondary" : "btn-primary"}
+                  style={{ cursor: purchasing ? "not-allowed" : "pointer" }}
                 >
                   {purchasing ? "Submitting..." : "Submit Order"}
                 </button>
 
                 {purchaseMsg && (
-                  <p style={{
-                    marginTop: 10,
-                    color: purchaseMsg.type === "success" ? "green" : "red",
-                    background: purchaseMsg.type === "success" ? "#eafaf1" : "#fdecea",
-                    padding: 10, borderRadius: 6,
-                  }}>
+                  <p className={purchaseMsg.type === "success" ? "success-text mt-sm" : "error-text mt-sm"}>
                     {purchaseMsg.text}
                   </p>
                 )}
@@ -273,77 +203,23 @@ export default function EventDetails() {
           </div>
         )}
 
-        {/* -------- Normal Event Register Button -------- */}
+        {/* Normal Event Register */}
         {event.eventType === "NORMAL" && (
-          <button
-            onClick={handleRegister}
-            disabled={isDisabled}
-            style={{
-              padding: "12px 24px",
-              background: isDisabled ? "#ccc" : "#007bff",
-              color: "#fff",
-              border: "none",
-              borderRadius: 6,
-              cursor: isDisabled ? "not-allowed" : "pointer",
-              marginTop: 20,
-              fontSize: "1rem",
-              fontWeight: "bold",
-            }}
+          <button onClick={handleRegister} disabled={isDisabled}
+            className={isDisabled ? "btn-secondary" : "btn-primary"}
+            style={{ marginTop: 20, cursor: isDisabled ? "not-allowed" : "pointer" }}
           >
-            {event.registrationFee > 0
-              ? `Proceed to Payment (₹${event.registrationFee})`
-              : "Register"}
+            {event.registrationFee > 0 ? `Proceed to Payment (₹${event.registrationFee})` : "Register"}
           </button>
         )}
 
-        {/* -------- Blocking Messages -------- */}
-        {isDeadlinePassed && (
-          <p style={{ color: "red", marginTop: 8 }}>Registration deadline has passed.</p>
-        )}
-        {isFull && (
-          <p style={{ color: "red", marginTop: 8 }}>Registration limit reached.</p>
-        )}
-        {isStockOver && (
-          <p style={{ color: "red", marginTop: 8 }}>Merchandise out of stock.</p>
-        )}
+        {isDeadlinePassed && <p className="error-text mt-sm">Registration deadline has passed.</p>}
+        {isFull && <p className="error-text mt-sm">Registration limit reached.</p>}
+        {isStockOver && <p className="error-text mt-sm">Merchandise out of stock.</p>}
       </div>
 
-      {/* -------- Discussion Forum -------- */}
-      <hr style={{ margin: "30px 0" }} />
+      <hr />
       <DiscussionForum eventId={id} isOrganizer={false} />
-
     </Layout>
   );
 }
-
-/* ================= Helpers ================= */
-
-const badgeStyle = (color) => ({
-  background: color,
-  color: "#fff",
-  padding: "3px 10px",
-  borderRadius: 4,
-  fontSize: "0.8rem",
-  fontWeight: "bold",
-});
-
-const tableStyle = {
-  width: "100%",
-  borderCollapse: "collapse",
-  margin: "16px 0",
-};
-
-const labelStyle = {
-  fontWeight: "bold",
-  padding: "8px 12px 8px 0",
-  borderBottom: "1px solid #eee",
-  color: "#555",
-  width: 180,
-};
-
-const inputStyle = {
-  padding: "8px",
-  border: "1px solid #ccc",
-  borderRadius: 4,
-  fontSize: "0.9rem",
-};

@@ -9,9 +9,7 @@ const ClubsList = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        fetchOrganizers();
-    }, []);
+    useEffect(() => { fetchOrganizers(); }, []);
 
     const fetchOrganizers = async () => {
         try {
@@ -43,40 +41,37 @@ const ClubsList = () => {
         }
     };
 
-    if (loading) return <Layout><p style={{ padding: 20 }}>Loading...</p></Layout>;
-    if (error) return <Layout><p style={{ padding: 20, color: "red" }}>{error}</p></Layout>;
+    if (loading) return <Layout><p>Loading...</p></Layout>;
+    if (error) return <Layout><p className="error-text">{error}</p></Layout>;
 
     return (
         <Layout>
-            <h2>Clubs / Organizers</h2>
+            <div className="page-header">
+                <h2 className="page-title">🏛️ Clubs / Organizers</h2>
+            </div>
 
             {organizers.length === 0 ? (
-                <p style={{ color: "#888" }}>No organizers found.</p>
+                <p style={{ color: "var(--text-muted)", textAlign: "center", padding: 30 }}>No organizers found.</p>
             ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+                <div className="grid-3">
                     {organizers.map((org) => (
-                        <div key={org._id} style={cardStyle}>
+                        <div key={org._id} className="card">
                             <h3
                                 onClick={() => navigate(`/organizer/${org._id}`)}
-                                style={{ cursor: "pointer", color: "#007bff", margin: "0 0 8px 0" }}
+                                style={{ cursor: "pointer", color: "var(--primary)", margin: "0 0 8px" }}
                             >
                                 {org.organizerName}
                             </h3>
-
-                            {org.category && (
-                                <span style={categoryBadge}>{org.category}</span>
-                            )}
-
-                            <p style={{ color: "#555", fontSize: "0.9rem", marginTop: 8 }}>
+                            {org.category && <span className="badge badge-gray">{org.category}</span>}
+                            <p style={{ fontSize: "0.9rem", marginTop: 10, color: "var(--text-secondary)" }}>
                                 {org.description || "No description available."}
                             </p>
-
                             {org.isFollowed ? (
-                                <button onClick={() => handleUnfollow(org._id)} style={unfollowBtn}>
+                                <button onClick={() => handleUnfollow(org._id)} className="btn-secondary btn-sm mt">
                                     Unfollow
                                 </button>
                             ) : (
-                                <button onClick={() => handleFollow(org._id)} style={followBtn}>
+                                <button onClick={() => handleFollow(org._id)} className="btn-primary btn-sm mt">
                                     Follow
                                 </button>
                             )}
@@ -86,44 +81,6 @@ const ClubsList = () => {
             )}
         </Layout>
     );
-};
-
-/* ================= Styles ================= */
-
-const cardStyle = {
-    border: "1px solid #e0e0e0",
-    padding: 16,
-    borderRadius: 10,
-    background: "#fff",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-};
-
-const categoryBadge = {
-    background: "#e8e8e8",
-    padding: "2px 8px",
-    borderRadius: 4,
-    fontSize: "0.8rem",
-    color: "#555",
-};
-
-const followBtn = {
-    padding: "8px 20px",
-    background: "#007bff",
-    color: "#fff",
-    border: "none",
-    borderRadius: 5,
-    cursor: "pointer",
-    marginTop: 12,
-};
-
-const unfollowBtn = {
-    padding: "8px 20px",
-    background: "#6c757d",
-    color: "#fff",
-    border: "none",
-    borderRadius: 5,
-    cursor: "pointer",
-    marginTop: 12,
 };
 
 export default ClubsList;

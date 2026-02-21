@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../services/authService";
 import { setAuth, getToken, getRole } from "../utils/auth";
+
 export default function Login() {
   const navigate = useNavigate();
 
@@ -12,30 +13,20 @@ export default function Login() {
   useEffect(() => {
     const token = getToken();
     const role = getRole();
-
-    if (token && role) {
-      navigate(`/${role}`);
-    }
+    if (token && role) navigate(`/${role}`);
   }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!email) {
-      return setError("Email is required");
-    }
-
-    if (!password) {
-      return setError("Password is required");
-    }
+    if (!email) return setError("Email is required");
+    if (!password) return setError("Password is required");
 
     try {
       const data = await loginUser(email, password);
-
       setAuth(data.token, data.role);
 
-      // Check if participant needs onboarding
       if (data.role === "participant" && !data.onboardingCompleted) {
         navigate("/onboarding");
       } else {
@@ -47,33 +38,41 @@ export default function Login() {
   };
 
   return (
-    <div style={{ padding: 40 }}>
-      <h2>Login</h2>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h2>Welcome Back</h2>
+        <p className="auth-subtitle">Sign in to your Felicity account</p>
 
-      <form onSubmit={handleLogin}>
-        <input
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <br /><br />
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <br /><br />
+          <div className="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-        <button type="submit">Login</button>
-      </form>
+          <button type="submit" className="btn-primary w-full">Login</button>
+        </form>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <p className="error-text mt-sm">{error}</p>}
 
-      <p>
-        New participant? <Link to="/signup">Register</Link>
-      </p>
+        <p className="auth-footer">
+          New participant? <Link to="/signup">Create an account</Link>
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,23 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Layout from "../components/Layout";
-import {
-  saveOnboarding,
-  skipOnboarding,
-  getAllOrganizers,
-} from "../services/participantService";
+import { saveOnboarding, skipOnboarding, getAllOrganizers } from "../services/participantService";
 
 const INTEREST_OPTIONS = [
-  "Technology",
-  "Sports",
-  "Music",
-  "Art",
-  "Literature",
-  "Science",
-  "Business",
-  "Gaming",
-  "Photography",
-  "Dance",
+  "Technology", "Sports", "Music", "Art", "Literature",
+  "Science", "Business", "Gaming", "Photography", "Dance",
 ];
 
 export default function Onboarding() {
@@ -25,12 +12,9 @@ export default function Onboarding() {
   const [organizers, setOrganizers] = useState([]);
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchOrganizers();
-  }, []);
+  useEffect(() => { fetchOrganizers(); }, []);
 
   const fetchOrganizers = async () => {
     try {
@@ -45,26 +29,19 @@ export default function Onboarding() {
 
   const toggleInterest = (interest) => {
     setInterests((prev) =>
-      prev.includes(interest)
-        ? prev.filter((i) => i !== interest)
-        : [...prev, interest]
+      prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest]
     );
   };
 
   const toggleOrganizer = (organizerId) => {
     setSelectedOrganizers((prev) =>
-      prev.includes(organizerId)
-        ? prev.filter((id) => id !== organizerId)
-        : [...prev, organizerId]
+      prev.includes(organizerId) ? prev.filter((id) => id !== organizerId) : [...prev, organizerId]
     );
   };
 
   const handleSave = async () => {
     try {
-      await saveOnboarding({
-        interests,
-        followedOrganizers: selectedOrganizers,
-      });
+      await saveOnboarding({ interests, followedOrganizers: selectedOrganizers });
       alert("Preferences saved!");
       navigate("/participant");
     } catch (err) {
@@ -81,105 +58,55 @@ export default function Onboarding() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <div className="onboarding-page"><p>Loading...</p></div>;
 
   return (
-    <Layout>
-      <h2>Welcome! Set Your Preferences</h2>
-      <p>You can skip this and configure later from your Profile page.</p>
+    <div className="onboarding-page">
+      <div className="onboarding-card">
+        <h2 style={{ textAlign: "center", marginBottom: 4 }}>Welcome to Felicity!</h2>
+        <p style={{ textAlign: "center", color: "var(--text-secondary)", marginBottom: 28 }}>
+          Set your preferences to get personalized event recommendations.
+        </p>
 
-      <hr />
-
-      <h3>1. Select Your Areas of Interest</h3>
-      <div style={gridStyle}>
-        {INTEREST_OPTIONS.map((interest) => (
-          <button
-            key={interest}
-            onClick={() => toggleInterest(interest)}
-            style={
-              interests.includes(interest) ? selectedBtnStyle : btnStyle
-            }
-          >
-            {interest}
-          </button>
-        ))}
-      </div>
-
-      <hr />
-
-      <h3>2. Follow Clubs / Organizers</h3>
-      {organizers.length === 0 ? (
-        <p>No organizers available yet.</p>
-      ) : (
-        <div style={gridStyle}>
-          {organizers.map((org) => (
-            <button
-              key={org._id}
-              onClick={() => toggleOrganizer(org._id)}
-              style={
-                selectedOrganizers.includes(org._id)
-                  ? selectedBtnStyle
-                  : btnStyle
-              }
+        <h3 className="mb-sm">1. Select Your Interests</h3>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
+          {INTEREST_OPTIONS.map((interest) => (
+            <span
+              key={interest}
+              className={`chip ${interests.includes(interest) ? "selected" : ""}`}
+              onClick={() => toggleInterest(interest)}
             >
-              {org.organizerName} ({org.category})
-            </button>
+              {interest}
+            </span>
           ))}
         </div>
-      )}
 
-      <hr />
+        <hr />
 
-      <div style={{ marginTop: 20 }}>
-        <button onClick={handleSave} style={saveBtnStyle}>
-          Save Preferences
-        </button>
-        <button onClick={handleSkip} style={skipBtnStyle}>
-          Skip for Now
-        </button>
+        <h3 className="mb-sm" style={{ marginTop: 20 }}>2. Follow Clubs / Organizers</h3>
+        {organizers.length === 0 ? (
+          <p style={{ color: "var(--text-muted)" }}>No organizers available yet.</p>
+        ) : (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
+            {organizers.map((org) => (
+              <span
+                key={org._id}
+                className={`chip ${selectedOrganizers.includes(org._id) ? "selected" : ""}`}
+                onClick={() => toggleOrganizer(org._id)}
+              >
+                {org.organizerName} ({org.category})
+              </span>
+            ))}
+          </div>
+        )}
+
+        <hr />
+
+        <div className="flex gap mt" style={{ justifyContent: "center" }}>
+          <button onClick={handleSave} className="btn-success">Save Preferences</button>
+          <button onClick={handleSkip} className="btn-secondary">Skip for Now</button>
+        </div>
       </div>
-    </Layout>
+    </div>
   );
 }
-
-const gridStyle = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: 10,
-  marginTop: 10,
-};
-
-const btnStyle = {
-  padding: "10px 15px",
-  border: "1px solid #ccc",
-  borderRadius: 5,
-  background: "#fff",
-  cursor: "pointer",
-};
-
-const selectedBtnStyle = {
-  padding: "10px 15px",
-  border: "2px solid #007bff",
-  borderRadius: 5,
-  background: "#e7f1ff",
-  cursor: "pointer",
-};
-
-const saveBtnStyle = {
-  padding: "12px 24px",
-  background: "#28a745",
-  color: "#fff",
-  border: "none",
-  borderRadius: 5,
-  cursor: "pointer",
-  marginRight: 10,
-};
-
-const skipBtnStyle = {
-  padding: "12px 24px",
-  background: "#6c757d",
-  color: "#fff",
-  border: "none",
-  borderRadius: 5,
-  cursor: "pointer",
-};

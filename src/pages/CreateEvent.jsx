@@ -7,7 +7,6 @@ import FormBuilder from "../components/FormBuilder";
 export default function CreateEvent() {
     const navigate = useNavigate();
 
-    // Basic event fields
     const [eventName, setEventName] = useState("");
     const [description, setDescription] = useState("");
     const [eventType, setEventType] = useState("NORMAL");
@@ -18,11 +17,8 @@ export default function CreateEvent() {
     const [registrationLimit, setRegistrationLimit] = useState("");
     const [registrationFee, setRegistrationFee] = useState("");
     const [tags, setTags] = useState("");
-
-    // Custom Form
     const [customForm, setCustomForm] = useState([]);
 
-    // Merchandise fields
     const [itemName, setItemName] = useState("");
     const [price, setPrice] = useState("");
     const [sizes, setSizes] = useState("S,M,L,XL");
@@ -33,25 +29,17 @@ export default function CreateEvent() {
     const handleCreate = async () => {
         try {
             const eventData = {
-                eventName,
-                description,
-                eventType,
-                eligibility,
-                registrationDeadline,
-                eventStartDate,
-                eventEndDate,
+                eventName, description, eventType, eligibility, registrationDeadline,
+                eventStartDate, eventEndDate,
                 registrationLimit: parseInt(registrationLimit),
                 registrationFee: eventType === "NORMAL" ? parseFloat(registrationFee) : parseFloat(price),
                 tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
-                customForm: customForm, // Include custom form
+                customForm,
             };
 
-            // Add merchandise details if MERCHANDISE type
             if (eventType === "MERCHANDISE") {
                 const sizeArray = sizes.split(",").map((s) => s.trim()).filter(Boolean);
                 const colorArray = colors.split(",").map((c) => c.trim()).filter(Boolean);
-
-                // Generate variants with stock
                 const stockPerVariant = Math.floor(parseInt(totalStock) / (sizeArray.length * colorArray.length));
                 const variants = [];
                 for (const size of sizeArray) {
@@ -59,14 +47,9 @@ export default function CreateEvent() {
                         variants.push({ size, color, stock: stockPerVariant });
                     }
                 }
-
                 eventData.merchandiseDetails = {
-                    itemName,
-                    price: parseFloat(price),
-                    sizes: sizeArray,
-                    colors: colorArray,
-                    variants,
-                    totalStock: parseInt(totalStock),
+                    itemName, price: parseFloat(price), sizes: sizeArray, colors: colorArray,
+                    variants, totalStock: parseInt(totalStock),
                     purchaseLimitPerParticipant: parseInt(purchaseLimit),
                 };
             }
@@ -81,203 +64,115 @@ export default function CreateEvent() {
 
     return (
         <Layout>
-            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                <h2>Create New Event</h2>
+            <div style={{ maxWidth: 740, margin: "0 auto" }}>
+                <h2 className="page-title">✨ Create New Event</h2>
 
-                <select
-                    value={eventType}
-                    onChange={(e) => setEventType(e.target.value)}
-                    style={selectStyle}
-                >
-                    <option value="NORMAL">Normal Event</option>
-                    <option value="MERCHANDISE">Merchandise Event</option>
-                </select>
-                <br /><br />
-
-                <input
-                    placeholder="Event Name"
-                    value={eventName}
-                    onChange={(e) => setEventName(e.target.value)}
-                    style={inputStyle}
-                />
-
-                <textarea
-                    placeholder="Description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    style={{ ...inputStyle, height: 80 }}
-                />
-
-                <div style={{ display: 'flex', gap: '20px' }}>
-                    <div style={{ flex: 1 }}>
-                        <label>Eligibility:</label>
-                        <select
-                            value={eligibility}
-                            onChange={(e) => setEligibility(e.target.value)}
-                            style={{ ...selectStyle, width: '100%' }}
-                        >
-                            <option value="ALL">All Participants</option>
-                            <option value="IIIT">IIIT Only</option>
-                            <option value="NON-IIIT">Non-IIIT Only</option>
+                <div className="card mb-lg">
+                    <div className="form-group">
+                        <label>Event Type</label>
+                        <select value={eventType} onChange={(e) => setEventType(e.target.value)}>
+                            <option value="NORMAL">Normal Event</option>
+                            <option value="MERCHANDISE">Merchandise Event</option>
                         </select>
                     </div>
-                    <div style={{ flex: 1 }}>
-                        <label>Reg. Limit:</label>
-                        <input
-                            placeholder="Limit"
-                            type="number"
-                            value={registrationLimit}
-                            onChange={(e) => setRegistrationLimit(e.target.value)}
-                            style={{ ...inputStyle, width: '100%' }}
-                        />
+
+                    <div className="form-group">
+                        <label>Event Name</label>
+                        <input placeholder="Give your event a name" value={eventName} onChange={(e) => setEventName(e.target.value)} />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Description</label>
+                        <textarea placeholder="Describe your event..." value={description} onChange={(e) => setDescription(e.target.value)} />
+                    </div>
+
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label>Eligibility</label>
+                            <select value={eligibility} onChange={(e) => setEligibility(e.target.value)}>
+                                <option value="ALL">All Participants</option>
+                                <option value="IIIT">IIIT Only</option>
+                                <option value="NON-IIIT">Non-IIIT Only</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Registration Limit</label>
+                            <input type="number" placeholder="0 = unlimited" value={registrationLimit} onChange={(e) => setRegistrationLimit(e.target.value)} />
+                        </div>
+                    </div>
+
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label>Start Date & Time</label>
+                            <input type="datetime-local" value={eventStartDate} onChange={(e) => setEventStartDate(e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                            <label>End Date & Time</label>
+                            <input type="datetime-local" value={eventEndDate} onChange={(e) => setEventEndDate(e.target.value)} />
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Registration Deadline</label>
+                        <input type="datetime-local" value={registrationDeadline} onChange={(e) => setRegistrationDeadline(e.target.value)} />
+                    </div>
+
+                    {eventType === "NORMAL" && (
+                        <div className="form-group">
+                            <label>Registration Fee (₹)</label>
+                            <input type="number" placeholder="0 for free events" value={registrationFee} onChange={(e) => setRegistrationFee(e.target.value)} />
+                        </div>
+                    )}
+
+                    <div className="form-group">
+                        <label>Tags (comma separated)</label>
+                        <input placeholder="e.g. technology, hackathon, coding" value={tags} onChange={(e) => setTags(e.target.value)} />
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
-                    <div style={{ flex: 1 }}>
-                        <label>Starts:</label>
-                        <input
-                            type="datetime-local"
-                            value={eventStartDate}
-                            onChange={(e) => setEventStartDate(e.target.value)}
-                            style={{ ...inputStyle, width: '100%' }}
-                        />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                        <label>Ends:</label>
-                        <input
-                            type="datetime-local"
-                            value={eventEndDate}
-                            onChange={(e) => setEventEndDate(e.target.value)}
-                            style={{ ...inputStyle, width: '100%' }}
-                        />
-                    </div>
-                </div>
-
-                <div style={{ marginTop: '10px' }}>
-                    <label>Deadline:</label>
-                    <input
-                        type="datetime-local"
-                        value={registrationDeadline}
-                        onChange={(e) => setRegistrationDeadline(e.target.value)}
-                        style={{ ...inputStyle, width: '100%' }}
-                    />
-                </div>
-
-                {/* Normal Event: Registration Fee */}
-                {eventType === "NORMAL" && (
-                    <div style={{ marginTop: '10px' }}>
-                        <input
-                            placeholder="Registration Fee (₹)"
-                            type="number"
-                            value={registrationFee}
-                            onChange={(e) => setRegistrationFee(e.target.value)}
-                            style={inputStyle}
-                        />
-                    </div>
-                )}
-
-                <input
-                    placeholder="Tags (comma separated)"
-                    value={tags}
-                    onChange={(e) => setTags(e.target.value)}
-                    style={{ ...inputStyle, marginTop: '10px' }}
-                />
-
-                {/* Form Builder */}
+                {/* Form Builder for Normal Events */}
                 {eventType === "NORMAL" && (
                     <FormBuilder formFields={customForm} setFormFields={setCustomForm} locked={false} />
                 )}
 
-                {/* Merchandise Event: Additional Fields */}
+                {/* Merchandise Details */}
                 {eventType === "MERCHANDISE" && (
-                    <div style={{ marginTop: '20px', borderTop: '1px solid #ccc', paddingTop: '10px' }}>
-                        <h4>Merchandise Details</h4>
-
-                        <input
-                            placeholder="Item Name (e.g., Club T-Shirt)"
-                            value={itemName}
-                            onChange={(e) => setItemName(e.target.value)}
-                            style={inputStyle}
-                        />
-
-                        <input
-                            placeholder="Price per item (₹)"
-                            type="number"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
-                            style={inputStyle}
-                        />
-
-                        <input
-                            placeholder="Sizes (e.g., S,M,L)"
-                            value={sizes}
-                            onChange={(e) => setSizes(e.target.value)}
-                            style={inputStyle}
-                        />
-
-                        <input
-                            placeholder="Colors (e.g., Black,White)"
-                            value={colors}
-                            onChange={(e) => setColors(e.target.value)}
-                            style={inputStyle}
-                        />
-
-                        <div style={{ display: 'flex', gap: '20px' }}>
-                            <input
-                                placeholder="Total Stock"
-                                type="number"
-                                value={totalStock}
-                                onChange={(e) => setTotalStock(e.target.value)}
-                                style={inputStyle}
-                            />
-                            <input
-                                placeholder="Purchase Limit"
-                                type="number"
-                                value={purchaseLimit}
-                                onChange={(e) => setPurchaseLimit(e.target.value)}
-                                style={inputStyle}
-                            />
+                    <div className="card mb-lg">
+                        <h3 style={{ marginBottom: 16 }}>🛍️ Merchandise Details</h3>
+                        <div className="form-group">
+                            <label>Item Name</label>
+                            <input placeholder="e.g. Club T-Shirt" value={itemName} onChange={(e) => setItemName(e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                            <label>Price per Item (₹)</label>
+                            <input type="number" placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                            <label>Sizes (comma separated)</label>
+                            <input placeholder="S,M,L,XL" value={sizes} onChange={(e) => setSizes(e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                            <label>Colors (comma separated)</label>
+                            <input placeholder="Black,White" value={colors} onChange={(e) => setColors(e.target.value)} />
+                        </div>
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label>Total Stock</label>
+                                <input type="number" placeholder="Total units" value={totalStock} onChange={(e) => setTotalStock(e.target.value)} />
+                            </div>
+                            <div className="form-group">
+                                <label>Purchase Limit / Person</label>
+                                <input type="number" value={purchaseLimit} onChange={(e) => setPurchaseLimit(e.target.value)} />
+                            </div>
                         </div>
                     </div>
                 )}
 
-                <div style={{ marginTop: '30px', marginBottom: '50px' }}>
-                    <button onClick={handleCreate} style={btnStyle}>
-                        Create Event
-                    </button>
-                    <button onClick={() => navigate("/organizer")} style={{ ...btnStyle, background: "#6c757d", marginLeft: "10px" }}>
-                        Cancel
-                    </button>
+                <div className="flex gap" style={{ marginBottom: 50 }}>
+                    <button onClick={handleCreate} className="btn-primary">Create Event</button>
+                    <button onClick={() => navigate("/organizer")} className="btn-secondary">Cancel</button>
                 </div>
             </div>
         </Layout>
     );
 }
-
-const inputStyle = {
-    padding: "10px",
-    width: "100%",
-    marginBottom: "10px",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
-    boxSizing: "border-box"
-};
-
-const selectStyle = {
-    padding: "10px",
-    width: "100%",
-    marginBottom: "10px",
-    borderRadius: "5px",
-    border: "1px solid #ccc"
-};
-
-const btnStyle = {
-    padding: "12px 24px",
-    background: "#007bff",
-    color: "#fff",
-    border: "none",
-    borderRadius: 5,
-    cursor: "pointer",
-    fontWeight: "bold"
-};

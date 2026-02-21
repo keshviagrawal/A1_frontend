@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { logout, getRole } from "../utils/auth"; // Ensure getRole is imported
+import { logout, getRole } from "../utils/auth";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const role = getRole(); // "participant", "organizer", or "admin"
+  const role = getRole();
 
   const handleLogout = () => {
     logout();
@@ -11,120 +11,45 @@ export default function Navbar() {
   };
 
   return (
-    <div style={styles.navbar}>
-      <h3 onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-        Event Management
-      </h3>
+    <nav className="navbar">
+      <div className="navbar-inner">
+        <span className="navbar-brand" onClick={() => navigate("/")}>
+          Felicity
+        </span>
 
-      <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+        <div className="navbar-links">
+          {/* Participant Navigation */}
+          {role === "participant" && (
+            <>
+              <button onClick={() => navigate("/participant")} className="nav-btn">Dashboard</button>
+              <button onClick={() => navigate("/browse")} className="nav-btn">Browse Events</button>
+              <button onClick={() => navigate("/clubs")} className="nav-btn">Clubs</button>
+              <button onClick={() => navigate("/profile")} className="nav-btn">My Profile</button>
+            </>
+          )}
 
-        {/* ONLY participants need a profile page */}
-        {/* Participant Navigation */}
+          {/* Organizer Navigation */}
+          {role === "organizer" && (
+            <>
+              <button onClick={() => navigate("/organizer")} className="nav-btn">Dashboard</button>
+              <button onClick={() => navigate("/organizer/create")} className="nav-btn">Create Event</button>
+              <button onClick={() => navigate("/organizer")} className="nav-btn">Ongoing Events</button>
+              <button onClick={() => navigate("/organizer/profile")} className="nav-btn">Profile</button>
+            </>
+          )}
 
-        {role === "participant" && (
-          <>
-            <button
-              onClick={() => navigate("/participant")}
-              style={styles.navBtn}
-            >
-              Dashboard
-            </button>
+          {/* Admin Navigation */}
+          {role === "admin" && (
+            <>
+              <button onClick={() => navigate("/admin")} className="nav-btn">Dashboard</button>
+              <button onClick={() => navigate("/admin/organizers")} className="nav-btn">Manage Organizers</button>
+              <button onClick={() => navigate("/admin/organizers?tab=resets")} className="nav-btn">Password Resets</button>
+            </>
+          )}
 
-            <button
-              onClick={() => navigate("/browse")}
-              style={styles.navBtn}
-            >
-              Browse Events
-            </button>
-
-            <button
-              onClick={() => navigate("/clubs")}
-              style={styles.navBtn}
-            >
-              Clubs / Organizers
-            </button>
-
-            <button
-              onClick={() => navigate("/profile")}
-              style={styles.navBtn}
-            >
-              My Profile
-            </button>
-          </>
-        )}
-
-        {/* Show Dashboard based on role */}
-        {role === "organizer" && (
-          <>
-            <button
-              onClick={() => navigate("/organizer")}
-              style={styles.navBtn}
-            >
-              Dashboard
-            </button>
-            <button
-              onClick={() => navigate("/organizer/create")}
-              style={styles.navBtn}
-            >
-              Create Event
-            </button>
-            {/* Ongoing Events - linking to dashboard for now, could be filtered */}
-            <button
-              onClick={() => navigate("/organizer")}
-              style={styles.navBtn}
-            >
-              Ongoing Events
-            </button>
-            <button
-              onClick={() => navigate("/organizer/profile")}
-              style={styles.navBtn}
-            >
-              Profile
-            </button>
-          </>
-        )}
-
-        {/* Admin Navigation */}
-        {role === "admin" && (
-          <>
-            <button onClick={() => navigate("/admin")} style={styles.navBtn}>Dashboard</button>
-            <button onClick={() => navigate("/admin/organizers")} style={styles.navBtn}>Manage Organizers</button>
-            <button onClick={() => navigate("/admin/organizers?tab=resets")} style={styles.navBtn}>Password Resets</button>
-          </>
-        )}
+          <button onClick={handleLogout} className="nav-btn-logout">Logout</button>
+        </div>
       </div>
-
-      <button onClick={handleLogout} style={styles.logoutBtn}>
-        Logout
-      </button>
-    </div>
+    </nav>
   );
 }
-
-
-const styles = {
-  navbar: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "15px 30px",
-    backgroundColor: "#1e293b",
-    color: "white",
-  },
-  navBtn: {
-    padding: "8px 16px",
-    cursor: "pointer",
-    background: "transparent",
-    color: "white",
-    border: "1px solid white",
-    borderRadius: "4px",
-  },
-  logoutBtn: {
-    padding: "8px 16px",
-    cursor: "pointer",
-    background: "#dc3545",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-  },
-};

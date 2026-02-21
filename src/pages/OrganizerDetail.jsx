@@ -9,9 +9,7 @@ const OrganizerDetail = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchDetails();
-    }, []);
+    useEffect(() => { fetchDetails(); }, []);
 
     const fetchDetails = async () => {
         try {
@@ -27,65 +25,59 @@ const OrganizerDetail = () => {
 
     const formatDate = (dateStr) => {
         if (!dateStr) return "";
-        return new Date(dateStr).toLocaleDateString("en-IN", {
-            day: "numeric", month: "short", year: "numeric",
-        });
+        return new Date(dateStr).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
     };
 
-    if (loading) return <Layout><p style={{ padding: 20 }}>Loading...</p></Layout>;
-    if (error) return <Layout><p style={{ padding: 20, color: "red" }}>Error: {error}</p></Layout>;
-    if (!data) return <Layout><p style={{ padding: 20 }}>No data found</p></Layout>;
+    if (loading) return <Layout><p>Loading...</p></Layout>;
+    if (error) return <Layout><p className="error-text">{error}</p></Layout>;
+    if (!data) return <Layout><p>No data found</p></Layout>;
 
     return (
         <Layout>
-            <div style={{ maxWidth: 700, margin: "0 auto" }}>
-                <h2>{data.Organizer.organizerName}</h2>
-                <p style={{ color: "#555" }}>{data.Organizer.category}</p>
-                <p>{data.Organizer.description}</p>
+            <div style={{ maxWidth: 740, margin: "0 auto" }}>
+                <h2 className="page-title">{data.Organizer.organizerName}</h2>
+                <span className="badge badge-gray mb-sm">{data.Organizer.category}</span>
+                <p style={{ color: "var(--text-secondary)", marginTop: 10, lineHeight: 1.6 }}>{data.Organizer.description}</p>
                 {data.Organizer.contactEmail && (
-                    <p><strong>Email:</strong> {data.Organizer.contactEmail}</p>
+                    <p style={{ marginTop: 6, color: "var(--text)" }}><strong>Email:</strong> {data.Organizer.contactEmail}</p>
                 )}
 
-                <hr style={{ margin: "20px 0" }} />
+                <hr />
 
-                <h3>Upcoming Events</h3>
+                <h3 className="mb-sm">📅 Upcoming Events</h3>
                 {data.Upcoming.length === 0 ? (
-                    <p style={{ color: "#888" }}>No upcoming events</p>
+                    <p style={{ color: "var(--text-muted)" }}>No upcoming events</p>
                 ) : (
-                    data.Upcoming.map((event) => (
-                        <div key={event._id} style={eventCard}>
-                            <h4 style={{ margin: 0 }}>{event.eventName}</h4>
-                            <p style={{ margin: "4px 0", fontSize: "0.9rem", color: "#555" }}>
-                                {formatDate(event.eventStartDate)} • {event.eventType}
-                            </p>
-                        </div>
-                    ))
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+                        {data.Upcoming.map((event) => (
+                            <div key={event._id} className="card" style={{ borderLeft: "4px solid var(--primary)" }}>
+                                <h4 style={{ margin: 0 }}>{event.eventName}</h4>
+                                <p style={{ margin: "4px 0", fontSize: "0.9rem", color: "var(--text-secondary)" }}>
+                                    {formatDate(event.eventStartDate)} • <span className="badge badge-info">{event.eventType}</span>
+                                </p>
+                            </div>
+                        ))}
+                    </div>
                 )}
 
-                <h3 style={{ marginTop: 24 }}>Past Events</h3>
+                <h3 className="mb-sm">📜 Past Events</h3>
                 {data.Past.length === 0 ? (
-                    <p style={{ color: "#888" }}>No past events</p>
+                    <p style={{ color: "var(--text-muted)" }}>No past events</p>
                 ) : (
-                    data.Past.map((event) => (
-                        <div key={event._id} style={{ ...eventCard, opacity: 0.7 }}>
-                            <h4 style={{ margin: 0 }}>{event.eventName}</h4>
-                            <p style={{ margin: "4px 0", fontSize: "0.9rem", color: "#555" }}>
-                                {formatDate(event.eventStartDate)} • {event.eventType}
-                            </p>
-                        </div>
-                    ))
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        {data.Past.map((event) => (
+                            <div key={event._id} className="card" style={{ opacity: 0.7 }}>
+                                <h4 style={{ margin: 0 }}>{event.eventName}</h4>
+                                <p style={{ margin: "4px 0", fontSize: "0.9rem", color: "var(--text-secondary)" }}>
+                                    {formatDate(event.eventStartDate)} • <span className="badge badge-gray">{event.eventType}</span>
+                                </p>
+                            </div>
+                        ))}
+                    </div>
                 )}
             </div>
         </Layout>
     );
-};
-
-const eventCard = {
-    border: "1px solid #e0e0e0",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-    background: "#fafafa",
 };
 
 export default OrganizerDetail;
