@@ -89,6 +89,7 @@ export default function Navbar() {
           <>
             <button onClick={() => navigate("/admin")} style={styles.navBtn}>Dashboard</button>
             <button onClick={() => navigate("/admin/organizers")} style={styles.navBtn}>Manage Organizers</button>
+            <button onClick={() => navigate("/admin/organizers?tab=resets")} style={styles.navBtn}>Password Resets</button>
           </>
         )}
       </div>

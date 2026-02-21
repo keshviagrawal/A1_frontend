@@ -13,6 +13,7 @@ export default function OrganizerProfile() {
         discordWebhook: ""
     });
     const [loading, setLoading] = useState(true);
+    const [loginEmail, setLoginEmail] = useState("");
 
     // Password reset request state
     const [showResetForm, setShowResetForm] = useState(false);
@@ -36,6 +37,7 @@ export default function OrganizerProfile() {
                 contactNumber: data.contactNumber || "",
                 discordWebhook: data.discordWebhook || ""
             });
+            setLoginEmail(data.userId?.email || "");
         } catch (err) {
             console.error("Failed to fetch profile", err);
         } finally {
@@ -94,6 +96,10 @@ export default function OrganizerProfile() {
         <Layout>
             <div style={{ maxWidth: '600px', margin: '0 auto' }}>
                 <h2>Organizer Profile</h2>
+
+                <div style={{ marginBottom: 16, padding: "12px 16px", background: "#f8f9fa", borderRadius: 8 }}>
+                    <p style={{ margin: "4px 0" }}><strong>Login Email:</strong> {loginEmail}</p>
+                </div>
 
                 <label>Organizer Name:</label>
                 <input

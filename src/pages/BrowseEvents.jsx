@@ -15,6 +15,21 @@ export default function BrowseEvents() {
   const [eligibility, setEligibility] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [showFollowedOnly, setShowFollowedOnly] = useState(false);
+  const [followedIds, setFollowedIds] = useState([]);
+
+  // Fetch followed organizer IDs on mount
+  useEffect(() => {
+    const fetchFollowed = async () => {
+      try {
+        const res = await api.get("/participants/profile");
+        setFollowedIds((res.data.followedOrganizers || []).map(id => typeof id === 'object' ? id._id : id));
+      } catch (err) {
+        console.error("Failed to fetch profile for followed clubs");
+      }
+    };
+    fetchFollowed();
+  }, []);
 
   useEffect(() => {
     fetchEvents();
@@ -110,6 +125,15 @@ export default function BrowseEvents() {
             style={dateInputStyle}
           />
         </div>
+
+        <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+          <input
+            type="checkbox"
+            checked={showFollowedOnly}
+            onChange={(e) => setShowFollowedOnly(e.target.checked)}
+          />
+          Followed Clubs Only
+        </label>
       </div>
 
       {/* ================= TRENDING ================= */}
@@ -144,56 +168,61 @@ export default function BrowseEvents() {
 
       {loading ? (
         <p>Loading events...</p>
-      ) : events.length === 0 ? (
-        <p style={{ color: "#888" }}>No events found matching your filters.</p>
-      ) : (
-        <div style={eventsGridStyle}>
-          {events.map((event) => (
-            <div
-              key={event._id}
-              style={cardStyle}
-              onClick={() => navigate(`/events/${event._id}`)}
-            >
-              {/* Badges */}
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
-                <span style={badgeStyle(event.eventType === "MERCHANDISE" ? "#e67e22" : "#3498db")}>
-                  {event.eventType}
-                </span>
-                <span style={badgeStyle("#27ae60")}>
-                  {event.eligibility}
-                </span>
-                {event.registrationFee > 0 && (
-                  <span style={badgeStyle("#8e44ad")}>
-                    ₹{event.registrationFee}
+      ) : (() => {
+        const displayedEvents = showFollowedOnly
+          ? events.filter(e => followedIds.includes(e.organizerId?._id))
+          : events;
+        return displayedEvents.length === 0 ? (
+          <p style={{ color: "#888" }}>No events found matching your filters.</p>
+        ) : (
+          <div style={eventsGridStyle}>
+            {displayedEvents.map((event) => (
+              <div
+                key={event._id}
+                style={cardStyle}
+                onClick={() => navigate(`/events/${event._id}`)}
+              >
+                {/* Badges */}
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+                  <span style={badgeStyle(event.eventType === "MERCHANDISE" ? "#e67e22" : "#3498db")}>
+                    {event.eventType}
                   </span>
-                )}
-                {event.registrationFee === 0 && event.eventType === "NORMAL" && (
-                  <span style={badgeStyle("#2ecc71")}>FREE</span>
-                )}
-              </div>
+                  <span style={badgeStyle("#27ae60")}>
+                    {event.eligibility}
+                  </span>
+                  {event.registrationFee > 0 && (
+                    <span style={badgeStyle("#8e44ad")}>
+                      ₹{event.registrationFee}
+                    </span>
+                  )}
+                  {event.registrationFee === 0 && event.eventType === "NORMAL" && (
+                    <span style={badgeStyle("#2ecc71")}>FREE</span>
+                  )}
+                </div>
 
-              <h4 style={{ margin: "0 0 6px 0" }}>{event.eventName}</h4>
-              <p style={{ color: "#555", fontSize: "0.9rem", margin: "0 0 8px 0", lineHeight: 1.4 }}>
-                {event.description?.length > 100
-                  ? event.description.slice(0, 100) + "..."
-                  : event.description}
-              </p>
+                <h4 style={{ margin: "0 0 6px 0" }}>{event.eventName}</h4>
+                <p style={{ color: "#555", fontSize: "0.9rem", margin: "0 0 8px 0", lineHeight: 1.4 }}>
+                  {event.description?.length > 100
+                    ? event.description.slice(0, 100) + "..."
+                    : event.description}
+                </p>
 
-              <div style={{ marginTop: "auto", paddingTop: 8, borderTop: "1px solid #eee" }}>
-                <p style={{ margin: "2px 0", fontSize: "0.85rem" }}>
-                  <strong>Organizer:</strong> {event.organizerId?.organizerName || "Unknown"}
-                </p>
-                <p style={{ margin: "2px 0", fontSize: "0.85rem" }}>
-                  <strong>Date:</strong> {formatDate(event.eventStartDate)}
-                </p>
-                <p style={{ margin: "2px 0", fontSize: "0.85rem" }}>
-                  <strong>Deadline:</strong> {formatDate(event.registrationDeadline)}
-                </p>
+                <div style={{ marginTop: "auto", paddingTop: 8, borderTop: "1px solid #eee" }}>
+                  <p style={{ margin: "2px 0", fontSize: "0.85rem" }}>
+                    <strong>Organizer:</strong> {event.organizerId?.organizerName || "Unknown"}
+                  </p>
+                  <p style={{ margin: "2px 0", fontSize: "0.85rem" }}>
+                    <strong>Date:</strong> {formatDate(event.eventStartDate)}
+                  </p>
+                  <p style={{ margin: "2px 0", fontSize: "0.85rem" }}>
+                    <strong>Deadline:</strong> {formatDate(event.registrationDeadline)}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        );
+      })()}
     </Layout>
   );
 }

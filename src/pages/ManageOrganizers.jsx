@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Layout from "../components/Layout";
 import api from "../services/api";
 
 export default function ManageOrganizers() {
+    const [searchParams] = useSearchParams();
     const [organizers, setOrganizers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [activeTab, setActiveTab] = useState("organizers");
+    const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "resets" ? "resets" : "organizers");
 
     // New Organizer Form State
     const [newOrg, setNewOrg] = useState({

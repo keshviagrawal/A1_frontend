@@ -7,7 +7,6 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isIIIT, setIsIIIT] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -19,11 +18,6 @@ export default function Login() {
     }
   }, []);
 
-  // Auto-detect IIIT email
-  useEffect(() => {
-    setIsIIIT(email.endsWith("@iiit.ac.in"));
-  }, [email]);
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -32,12 +26,12 @@ export default function Login() {
       return setError("Email is required");
     }
 
-    if (!isIIIT && !password) {
+    if (!password) {
       return setError("Password is required");
     }
 
     try {
-      const data = await loginUser(email, isIIIT ? undefined : password);
+      const data = await loginUser(email, password);
 
       setAuth(data.token, data.role);
 
@@ -64,24 +58,13 @@ export default function Login() {
         />
         <br /><br />
 
-        {/* Show password field only for non-IIIT users */}
-        {!isIIIT && (
-          <>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <br /><br />
-          </>
-        )}
-
-        {isIIIT && (
-          <p style={{ color: "green", margin: "0 0 15px 0" }}>
-            ✓ IIIT email detected - No password required
-          </p>
-        )}
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <br /><br />
 
         <button type="submit">Login</button>
       </form>
@@ -94,5 +77,3 @@ export default function Login() {
     </div>
   );
 }
-
-// the frontend thing starts from here (login page) finally receive the full address, then send {token ,role} stored in local storage and navigate to the correct role

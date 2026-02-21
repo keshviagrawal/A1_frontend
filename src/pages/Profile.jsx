@@ -24,8 +24,13 @@ export default function Profile() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
+  const [collegeOrOrgName, setCollegeOrOrgName] = useState("");
   const [interests, setInterests] = useState([]);
   const [followedOrganizers, setFollowedOrganizers] = useState([]);
+
+  // Non-editable fields
+  const [email, setEmail] = useState("");
+  const [participantType, setParticipantType] = useState("");
 
   useEffect(() => {
     loadData();
@@ -41,8 +46,11 @@ export default function Profile() {
       setFirstName(profile.firstName || "");
       setLastName(profile.lastName || "");
       setContactNumber(profile.contactNumber || "");
+      setCollegeOrOrgName(profile.collegeOrOrgName || "");
       setInterests(profile.interests || []);
       setFollowedOrganizers(profile.followedOrganizers || []);
+      setEmail(profile.email || "");
+      setParticipantType(profile.participantType || "");
       setAllOrganizers(organizers);
     } catch (err) {
       alert("Failed to load profile data");
@@ -66,6 +74,7 @@ export default function Profile() {
         firstName,
         lastName,
         contactNumber,
+        collegeOrOrgName,
         interests,
         followedOrganizers
       });
@@ -120,6 +129,11 @@ export default function Profile() {
     <Layout>
       <h2>My Profile</h2>
 
+      <div style={{ marginBottom: 16, padding: "12px 16px", background: "#f8f9fa", borderRadius: 8 }}>
+        <p style={{ margin: "4px 0" }}><strong>Email:</strong> {email}</p>
+        <p style={{ margin: "4px 0" }}><strong>Participant Type:</strong> {participantType}</p>
+      </div>
+
       <div style={{ marginBottom: 20 }}>
         <label>First Name: </label>
         <input value={firstName} onChange={e => setFirstName(e.target.value)} />
@@ -139,6 +153,11 @@ export default function Profile() {
           maxLength={10}
         />
         {contactError && <p style={{ color: "red", fontSize: "0.85rem", margin: "4px 0 0" }}>{contactError}</p>}
+      </div>
+
+      <div style={{ marginBottom: 20 }}>
+        <label>College / Organization: </label>
+        <input value={collegeOrOrgName} onChange={e => setCollegeOrOrgName(e.target.value)} />
       </div>
 
       <hr />

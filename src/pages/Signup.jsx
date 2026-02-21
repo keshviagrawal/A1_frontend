@@ -30,27 +30,29 @@ export default function Signup() {
     }
 
     // IIIT email validation
-    if (participantType === "IIIT" && !email.endsWith("@iiit.ac.in")) {
-      return setError("IIIT participants must use @iiit.ac.in email");
+    const iiitDomains = ["@iiit.ac.in", "@students.iiit.ac.in", "@research.iiit.ac.in"];
+    if (participantType === "IIIT") {
+      const isValidIIIT = iiitDomains.some(domain => email.endsWith(domain));
+      if (!isValidIIIT) {
+        return setError("IIIT participants must use @iiit.ac.in, @students.iiit.ac.in, or @research.iiit.ac.in email");
+      }
     }
 
-    // Non-IIIT password validation
-    if (participantType === "NON-IIIT") {
-      if (!password || !confirmPassword) {
-        return setError("Password is required for Non-IIIT participants");
-      }
-      if (password.length < 6) {
-        return setError("Password must be at least 6 characters");
-      }
-      if (password !== confirmPassword) {
-        return setError("Passwords do not match");
-      }
+    // Password validation for all users
+    if (!password || !confirmPassword) {
+      return setError("Password is required");
+    }
+    if (password.length < 6) {
+      return setError("Password must be at least 6 characters");
+    }
+    if (password !== confirmPassword) {
+      return setError("Passwords do not match");
     }
 
     try {
       await registerUser({
         email,
-        password: participantType === "IIIT" ? undefined : password,
+        password,
         firstName,
         lastName,
         participantType,
@@ -101,7 +103,11 @@ export default function Signup() {
 
         <select
           value={participantType}
-          onChange={(e) => setParticipantType(e.target.value)}
+          onChange={(e) => {
+            setParticipantType(e.target.value);
+            if (e.target.value === "IIIT") setCollegeOrOrgName("IIIT Hyderabad");
+            else setCollegeOrOrgName("");
+          }}
           style={{ padding: "8px", width: "200px" }}
         >
           <option value="NON-IIIT">Non-IIIT</option>
@@ -109,26 +115,21 @@ export default function Signup() {
         </select>
         <br /><br />
 
-        {/* Only show password fields for Non-IIIT */}
-        {participantType === "NON-IIIT" && (
-          <>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <br /><br />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <br /><br />
 
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-            <br /><br />
-          </>
-        )}
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+        <br /><br />
 
         <input
           placeholder="College / Organization Name"
